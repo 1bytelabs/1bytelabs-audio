@@ -1,6 +1,6 @@
 # 1Byte Labs Audio 0.4.1
 
-VST2 com Enviar/Receber e fonte nativa de áudio NDI para o OBS. Windows x64.
+Plugin VST2 para envio e recepção de áudio NDI em hosts compatíveis, com fonte nativa para OBS Studio. Windows x64.
 
 ## Escolha como instalar
 
@@ -8,7 +8,7 @@ VST2 com Enviar/Receber e fonte nativa de áudio NDI para o OBS. Windows x64.
 - **1ByteLabs-Audio-0.4.1-VST2-Manual-x64.zip**: somente o VST2, runtime NDI e avisos. Extraia na pasta de VST2, por padrão C:\Program Files\VSTPlugins\1Byte Labs.
 - **1ByteLabs-Audio-0.4.1-OBS-Manual-x64.zip**: somente os arquivos da fonte OBS. Extraia na raiz do OBS instalado ou portable, mantendo as pastas obs-plugins e data.
 
-Feche OBS e REAPER antes de atualizar. O runtime NDI já acompanha os componentes.
+Feche os programas que usam o plugin e o OBS antes de atualizar. O runtime NDI já acompanha os componentes.
 
 ## Receber diretamente no OBS
 
@@ -16,7 +16,9 @@ Requer OBS 31.1+ x64. Em **Fontes → + → 1Byte Labs Audio**, use **Atualizar 
 
 ## Usar o VST2
 
-Adicione **1Byte Labs Audio** no REAPER ou como filtro VST 2.x de uma fonte de áudio ativa do OBS. Escolha **Enviar** ou **Receber** na mesma janela.
+Adicione **1Byte Labs Audio** em um programa de 64 bits compatível com plugins VST2 e escolha **Enviar** ou **Receber** na mesma janela.
+
+REAPER e o filtro VST 2.x do OBS são exemplos testados. No OBS, o filtro precisa estar em uma fonte de áudio ativa; para receber sem essa dependência, use a fonte nativa.
 
 Em Enviar, o fader altera somente o sinal NDI. Em Receber, o áudio selecionado substitui a entrada. Desligar a recepção deixa a saída silenciosa; usar o bypass do host volta a passar a entrada local.
 

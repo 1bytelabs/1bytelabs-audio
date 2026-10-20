@@ -14,7 +14,7 @@ NDI FrameSync faz conversao de taxa e ajuste de relogio. A fila usa o mesmo back
 
 O instalador oferece **VST2**, **Fonte nativa OBS** ou ambos. Para OBS instalado, procura o caminho no registro e na pasta padrao. Para portable, escolha a raiz do OBS ou a pasta bin/64bit que contem obs64.exe. O instalador valida um executavel x64 antes de copiar e mostra o destino na pagina de confirmacao.
 
-Feche o OBS e o REAPER antes de instalar ou desinstalar. A instalacao nao muda cenas, perfis, dispositivos ou firewall. Os arquivos OBS sao:
+Feche o OBS e os programas que usam o VST2 antes de instalar ou desinstalar. A instalacao nao muda cenas, perfis, dispositivos ou firewall. Os arquivos OBS sao:
 - obs-plugins/64bit/1byte-labs-audio.dll
 - obs-plugins/64bit/1byte-audio-ndi/Processing.NDI.Lib.x64.dll
 - data/obs-plugins/1byte-labs-audio/README.md

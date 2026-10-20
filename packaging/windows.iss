@@ -31,7 +31,7 @@ Name: "obsonly"; Description: "Somente fonte nativa OBS"
 Name: "custom"; Description: "Personalizada"; Flags: iscustom
 
 [Components]
-Name: "vst"; Description: "VST2 - Enviar e Receber (REAPER e filtros OBS)"; Types: full vstonly
+Name: "vst"; Description: "VST2 - Enviar e Receber (hosts compativeis de 64 bits)"; Types: full vstonly
 Name: "obs"; Description: "Fonte nativa OBS - Receber sem microfone"; Types: full obsonly
 
 [Files]
@@ -112,8 +112,8 @@ end;
 procedure InitializeWizard;
 begin
   VstPage := CreateInputDirPage(wpSelectComponents, 'Pasta do plugin VST2',
-    'Escolha a pasta de plugins usada pelo REAPER e pelos filtros OBS.',
-    'O instalador cria a pasta VST2 e copia o plugin e seu runtime NDI. Feche OBS e REAPER antes de continuar.', False, '');
+    'Escolha a pasta de plugins VST2 usada pelos seus programas.',
+    'O instalador cria a pasta VST2 e copia o plugin e seu runtime NDI. Feche os programas que usam o plugin antes de continuar.', False, '');
   VstPage.Add('Destino VST2 (64 bits):');
   VstPage.Values[0] := GetPreviousData('VstDir', ExpandConstant('{autopf}\VSTPlugins\1Byte Labs'));
   if ExpandConstant('{param:VSTDIR|}') <> '' then
