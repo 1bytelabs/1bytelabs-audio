@@ -1,0 +1,14 @@
+build*/
+.deps/
+.obs-template/
+.obs-runtime/
+dist*/
+release-out/
+installer-out/
+CMakeUserPresets.json
+*.user
+*.suo
+*.pdb
+*.obj
+*.exe
+*.dll
