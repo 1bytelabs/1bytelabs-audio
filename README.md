@@ -1,5 +1,7 @@
 # 1Byte Labs Audio 0.4.1
 
+[**Baixar a versão mais recente**](https://github.com/1bytelabs/1bytelabs-audio/releases/latest)
+
 Plugin VST2 para envio e recepção de áudio NDI em hosts compatíveis, com fonte nativa para OBS Studio. Windows x64.
 
 ## Escolha como instalar

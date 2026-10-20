@@ -1,0 +1,89 @@
+name: Publish validated Audio release
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/release-request.json']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate successful build and download its exact release files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = '1bytelabs/1bytelabs-audio'
+          version="$(jq -er '.version' .github/release-request.json)"
+          commit="$(jq -er '.source_commit' .github/release-request.json)"
+          run="$(jq -er '.workflow_run' .github/release-request.json)"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$commit" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$run" =~ ^[0-9]+$ ]]
+          tag="v$version"
+          artifact="1ByteLabs-Audio-$version-Windows-x64"
+          test -f ".github/release-notes/$tag.md"
+          passed=false
+          for attempt in $(seq 1 90); do
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" > /tmp/audio-build.json
+            jq -e --arg repo "$GITHUB_REPOSITORY" --arg commit "$commit" '
+              .repository.full_name == $repo and .head_sha == $commit and
+              .head_branch == "main" and .event == "push" and
+              .path == ".github/workflows/build-windows.yml"
+            ' /tmp/audio-build.json > /dev/null
+            state="$(jq -r '.status' /tmp/audio-build.json)"
+            if [ "$state" = completed ]; then
+              jq -e '.conclusion == "success"' /tmp/audio-build.json > /dev/null
+              passed=true
+              break
+            fi
+            echo "Waiting for validated build $run ($state)."
+            sleep 10
+          done
+          test "$passed" = true
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/artifacts" > /tmp/audio-artifacts.json
+          jq -e --arg name "$artifact" '
+            [.artifacts[] | select(.name == $name and .expired == false)] | length == 1
+          ' /tmp/audio-artifacts.json > /dev/null
+          gh run download "$run" --repo "$GITHUB_REPOSITORY" --name "$artifact" --dir release-assets
+          printf '%s\n' \
+            "1ByteLabs-Audio-$version-Setup-x64.exe" \
+            "1ByteLabs-Audio-$version-VST2-Manual-x64.zip" \
+            "1ByteLabs-Audio-$version-OBS-Manual-x64.zip" | sort > /tmp/expected-assets.txt
+          find release-assets -type f -printf '%P\n' | sort > /tmp/actual-assets.txt
+          diff -u /tmp/expected-assets.txt /tmp/actual-assets.txt
+          while IFS= read -r file; do test -s "release-assets/$file"; done < /tmp/expected-assets.txt
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+          echo "RELEASE_COMMIT=$commit" >> "$GITHUB_ENV"
+      - name: Upload all three assets as a draft, then publish stable Latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="$RELEASE_TAG"
+          # Never overwrite an existing published version.
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $tag already exists; refusing to replace it."
+            exit 1
+          fi
+          gh release create "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$RELEASE_COMMIT" \
+            --title "1Byte Labs Audio $RELEASE_VERSION" \
+            --notes-file ".github/release-notes/$tag.md" \
+            --draft \
+            "release-assets/1ByteLabs-Audio-$RELEASE_VERSION-Setup-x64.exe" \
+            "release-assets/1ByteLabs-Audio-$RELEASE_VERSION-VST2-Manual-x64.zip" \
+            "release-assets/1ByteLabs-Audio-$RELEASE_VERSION-OBS-Manual-x64.zip"
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets,isDraft > /tmp/audio-release.json
+          jq -e '.isDraft == true and (.assets | length) == 3' /tmp/audio-release.json > /dev/null
+          gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false --latest
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url,isDraft,isPrerelease,assets
